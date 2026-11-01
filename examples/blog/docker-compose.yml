@@ -1,0 +1,56 @@
+# docker compose up --build runs the whole example: PostgreSQL, then migrations,
+# then demo data, then the API on http://localhost:8080.
+#
+# ant is unpublished for now, so the build context is the folder holding both the
+# ant and ant-examples checkouts. Once ant is tagged, it can be this folder.
+x-app: &app
+  build:
+    context: ../../..
+    dockerfile: ant-examples/examples/blog/Dockerfile
+  environment: &env
+    DATABASE_URL: postgres://blog:blog@db:5432/blog?sslmode=disable
+    ADMIN_TOKEN: dev-token
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: blog
+      POSTGRES_PASSWORD: blog
+      POSTGRES_DB: blog
+    ports: ["127.0.0.1:55440:5432"]
+    volumes: ["db:/var/lib/postgresql/data"]
+    healthcheck:
+      # Over TCP, because the image's first-run server answers on the socket and then
+      # restarts, which would catch the migrate service mid-connect.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U blog -d blog"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  # Runs once and exits. Migrations go first, so the server never starts on a
+  # schema older than its code.
+  migrate:
+    <<: *app
+    command: ["/app/migrate", "up"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  seed:
+    <<: *app
+    command: ["/app/migrate", "seed"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  server:
+    <<: *app
+    command: ["/app/server"]
+    ports: ["127.0.0.1:8080:8080"]
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+
+volumes:
+  db:

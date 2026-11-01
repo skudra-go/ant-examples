@@ -1,0 +1,433 @@
+{
+  "format": 1,
+  "dialect": "postgres",
+  "latest": "0001_create_ledger",
+  "enums": [
+    {
+      "name": "account_kind",
+      "values": [
+        "asset",
+        "liability",
+        "equity",
+        "income",
+        "expense"
+      ]
+    }
+  ],
+  "sequences": [
+    {
+      "name": "entry_numbers",
+      "start": 1000,
+      "increment": 1
+    }
+  ],
+  "tables": [
+    {
+      "name": "accounts",
+      "columns": [
+        {
+          "name": "tenant_id",
+          "type": "bigint"
+        },
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "parent_id",
+          "type": "bigint",
+          "nullable": true
+        },
+        {
+          "name": "code",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "kind",
+          "type": "account_kind"
+        },
+        {
+          "name": "currency",
+          "type": "char(3)"
+        },
+        {
+          "name": "balance",
+          "type": "bigint"
+        },
+        {
+          "name": "floor",
+          "type": "bigint"
+        },
+        {
+          "name": "iban",
+          "type": "text"
+        },
+        {
+          "name": "version",
+          "type": "bigint"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "closed_at",
+          "type": "timestamptz",
+          "nullable": true
+        }
+      ],
+      "primaryKey": {
+        "name": "accounts_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "checks": [
+        {
+          "name": "accounts_balance_floor",
+          "expr": "balance >= floor"
+        },
+        {
+          "name": "accounts_currency_upper",
+          "expr": "currency = upper(currency)"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "accounts_parent_id_idx",
+          "parts": [
+            {
+              "column": "parent_id"
+            }
+          ]
+        },
+        {
+          "name": "accounts_tenant_code_key",
+          "parts": [
+            {
+              "column": "tenant_id"
+            },
+            {
+              "column": "code"
+            }
+          ],
+          "unique": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "accounts_parent_id_fkey",
+          "columns": [
+            "parent_id"
+          ],
+          "refTable": "accounts",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "RESTRICT"
+        }
+      ]
+    },
+    {
+      "name": "entries",
+      "columns": [
+        {
+          "name": "tenant_id",
+          "type": "bigint"
+        },
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "number",
+          "type": "bigint",
+          "default": "nextval('entry_numbers')"
+        },
+        {
+          "name": "key",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "memo",
+          "type": "text"
+        },
+        {
+          "name": "reversal_of",
+          "type": "bigint",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ],
+      "primaryKey": {
+        "name": "entries_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "entries_tenant_key_key",
+          "parts": [
+            {
+              "column": "tenant_id"
+            },
+            {
+              "column": "key"
+            }
+          ],
+          "unique": true,
+          "where": "key IS NOT NULL"
+        }
+      ]
+    },
+    {
+      "name": "lines",
+      "columns": [
+        {
+          "name": "tenant_id",
+          "type": "bigint"
+        },
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "entry_id",
+          "type": "bigint"
+        },
+        {
+          "name": "account_id",
+          "type": "bigint"
+        },
+        {
+          "name": "amount",
+          "type": "bigint"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        }
+      ],
+      "primaryKey": {
+        "name": "lines_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "checks": [
+        {
+          "name": "lines_amount_not_zero",
+          "expr": "amount <> 0"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "lines_account_id_idx",
+          "parts": [
+            {
+              "column": "account_id"
+            },
+            {
+              "column": "id",
+              "desc": true
+            }
+          ]
+        },
+        {
+          "name": "lines_entry_id_idx",
+          "parts": [
+            {
+              "column": "entry_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "lines_account_id_fkey",
+          "columns": [
+            "account_id"
+          ],
+          "refTable": "accounts",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "RESTRICT"
+        },
+        {
+          "name": "lines_entry_id_fkey",
+          "columns": [
+            "entry_id"
+          ],
+          "refTable": "entries",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "RESTRICT"
+        }
+      ]
+    },
+    {
+      "name": "outbox",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "tenant_id",
+          "type": "bigint"
+        },
+        {
+          "name": "topic",
+          "type": "text"
+        },
+        {
+          "name": "payload",
+          "type": "jsonb"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "published_at",
+          "type": "timestamptz",
+          "nullable": true
+        }
+      ],
+      "primaryKey": {
+        "name": "outbox_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "outbox_pending_idx",
+          "parts": [
+            {
+              "column": "id"
+            }
+          ],
+          "where": "published_at IS NULL"
+        }
+      ]
+    },
+    {
+      "name": "statement_lines",
+      "columns": [
+        {
+          "name": "tenant_id",
+          "type": "bigint"
+        },
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "reference",
+          "type": "text"
+        },
+        {
+          "name": "account_id",
+          "type": "bigint"
+        },
+        {
+          "name": "amount",
+          "type": "bigint"
+        },
+        {
+          "name": "booked_on",
+          "type": "date"
+        }
+      ],
+      "primaryKey": {
+        "name": "statement_lines_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "statement_lines_account_id_idx",
+          "parts": [
+            {
+              "column": "account_id"
+            }
+          ]
+        },
+        {
+          "name": "statement_lines_tenant_reference_key",
+          "parts": [
+            {
+              "column": "tenant_id"
+            },
+            {
+              "column": "reference"
+            }
+          ],
+          "unique": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "statement_lines_account_id_fkey",
+          "columns": [
+            "account_id"
+          ],
+          "refTable": "accounts",
+          "refColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tenants",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "text"
+        }
+      ],
+      "primaryKey": {
+        "name": "tenants_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "tenants_name_key",
+          "columns": [
+            "name"
+          ]
+        }
+      ]
+    }
+  ]
+}

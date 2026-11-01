@@ -1,0 +1,326 @@
+{
+  "format": 1,
+  "dialect": "postgres",
+  "latest": "0001_create_audit",
+  "enums": [
+    {
+      "name": "event_outcome",
+      "values": [
+        "success",
+        "denied",
+        "failure"
+      ]
+    },
+    {
+      "name": "person_role",
+      "values": [
+        "affected",
+        "viewed",
+        "exported",
+        "notified"
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "name": "actors",
+      "columns": [
+        {
+          "name": "id",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "first_seen",
+          "type": "timestamptz"
+        },
+        {
+          "name": "last_seen",
+          "type": "timestamptz"
+        },
+        {
+          "name": "event_count",
+          "type": "bigint"
+        }
+      ],
+      "primaryKey": {
+        "name": "actors_pkey",
+        "columns": [
+          "id"
+        ]
+      }
+    },
+    {
+      "name": "daily_counts",
+      "columns": [
+        {
+          "name": "day",
+          "type": "date"
+        },
+        {
+          "name": "service",
+          "type": "text"
+        },
+        {
+          "name": "action",
+          "type": "text"
+        },
+        {
+          "name": "outcome",
+          "type": "event_outcome"
+        },
+        {
+          "name": "count",
+          "type": "bigint"
+        }
+      ],
+      "primaryKey": {
+        "name": "daily_counts_pkey",
+        "columns": [
+          "day",
+          "service",
+          "action",
+          "outcome"
+        ]
+      }
+    },
+    {
+      "name": "event_persons",
+      "partition": {
+        "method": "RANGE",
+        "columns": [
+          "occurred_at"
+        ]
+      },
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "event_id",
+          "type": "uuid"
+        },
+        {
+          "name": "occurred_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "ref",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "role",
+          "type": "person_role"
+        },
+        {
+          "name": "fields",
+          "type": "text[]",
+          "nullable": true
+        }
+      ],
+      "primaryKey": {
+        "name": "event_persons_pkey",
+        "columns": [
+          "id",
+          "occurred_at"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "event_persons_event_id_occurred_at_idx",
+          "parts": [
+            {
+              "column": "event_id"
+            },
+            {
+              "column": "occurred_at"
+            }
+          ]
+        },
+        {
+          "name": "event_persons_ref_occurred_at_idx",
+          "parts": [
+            {
+              "column": "ref"
+            },
+            {
+              "column": "occurred_at",
+              "desc": true
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "event_persons_event_id_occurred_at_fkey",
+          "columns": [
+            "event_id",
+            "occurred_at"
+          ],
+          "refTable": "events",
+          "refColumns": [
+            "id",
+            "occurred_at"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "events",
+      "comment": "Audit events, partitioned by month of occurred_at",
+      "partition": {
+        "method": "RANGE",
+        "columns": [
+          "occurred_at"
+        ]
+      },
+      "columns": [
+        {
+          "name": "id",
+          "type": "uuid"
+        },
+        {
+          "name": "occurred_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "service",
+          "type": "text"
+        },
+        {
+          "name": "action",
+          "type": "text"
+        },
+        {
+          "name": "outcome",
+          "type": "event_outcome"
+        },
+        {
+          "name": "actor_id",
+          "type": "text"
+        },
+        {
+          "name": "actor_name",
+          "type": "text"
+        },
+        {
+          "name": "resource_type",
+          "type": "text"
+        },
+        {
+          "name": "resource_id",
+          "type": "text"
+        },
+        {
+          "name": "ip",
+          "type": "inet",
+          "nullable": true
+        },
+        {
+          "name": "parent_id",
+          "type": "uuid",
+          "nullable": true
+        },
+        {
+          "name": "summary",
+          "type": "text"
+        },
+        {
+          "name": "metadata",
+          "type": "jsonb"
+        },
+        {
+          "name": "search",
+          "type": "tsvector",
+          "generated": "to_tsvector('simple', summary)"
+        }
+      ],
+      "primaryKey": {
+        "name": "events_pkey",
+        "columns": [
+          "id",
+          "occurred_at"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "events_actor_id_occurred_at_idx",
+          "parts": [
+            {
+              "column": "actor_id"
+            },
+            {
+              "column": "occurred_at",
+              "desc": true
+            }
+          ]
+        },
+        {
+          "name": "events_metadata_idx",
+          "parts": [
+            {
+              "column": "metadata"
+            }
+          ],
+          "method": "gin"
+        },
+        {
+          "name": "events_parent_idx",
+          "parts": [
+            {
+              "column": "parent_id"
+            }
+          ],
+          "where": "parent_id IS NOT NULL"
+        },
+        {
+          "name": "events_resource_idx",
+          "parts": [
+            {
+              "column": "resource_type"
+            },
+            {
+              "column": "resource_id"
+            }
+          ],
+          "where": "resource_id <> ''"
+        },
+        {
+          "name": "events_search_idx",
+          "parts": [
+            {
+              "column": "search"
+            }
+          ],
+          "method": "gin"
+        },
+        {
+          "name": "events_service_occurred_at_idx",
+          "parts": [
+            {
+              "column": "service"
+            },
+            {
+              "column": "occurred_at",
+              "desc": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

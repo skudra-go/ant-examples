@@ -1,0 +1,58 @@
+# docker compose up --build runs the whole example: PostgreSQL, then migrations,
+# then nine months of generated events, then the API on http://localhost:8081.
+#
+# ant is unpublished for now, so the build context is the folder holding both the
+# ant and ant-examples checkouts. Once ant is tagged, it can be this folder.
+x-app: &app
+  build:
+    context: ../../..
+    dockerfile: ant-examples/examples/audit/Dockerfile
+  environment: &env
+    DATABASE_URL: postgres://audit:audit@db:5432/audit?sslmode=disable
+    INGEST_TOKEN: ingest-token
+    ADMIN_TOKEN: admin-token
+    RETENTION_MONTHS: "6"
+    PARTITIONS_AHEAD: "3"
+    CLEANUP_CRON: "0 3 * * *"
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: audit
+      POSTGRES_PASSWORD: audit
+      POSTGRES_DB: audit
+    ports: ["127.0.0.1:55441:5432"]
+    volumes: ["db:/var/lib/postgresql/data"]
+    healthcheck:
+      # Over TCP, because the image's first-run server answers on the socket and then
+      # restarts, which would catch the migrate service mid-connect.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U audit -d audit"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  migrate:
+    <<: *app
+    command: ["/app/migrate", "up"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  loadgen:
+    <<: *app
+    command: ["/app/loadgen", "--events", "20000", "--months", "9"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  server:
+    <<: *app
+    command: ["/app/server"]
+    ports: ["127.0.0.1:8081:8080"]
+    depends_on:
+      loadgen:
+        condition: service_completed_successfully
+
+volumes:
+  db:

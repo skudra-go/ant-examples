@@ -1,0 +1,289 @@
+{
+  "format": 1,
+  "dialect": "postgres",
+  "latest": "0005_index_published_posts",
+  "tables": [
+    {
+      "name": "comments",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "post_id",
+          "type": "bigint"
+        },
+        {
+          "name": "author_name",
+          "type": "text"
+        },
+        {
+          "name": "body",
+          "type": "text"
+        }
+      ],
+      "primaryKey": {
+        "name": "comments_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "checks": [
+        {
+          "name": "comments_body_present",
+          "expr": "body <> ''"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "comments_post_id_idx",
+          "parts": [
+            {
+              "column": "post_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "comments_post_id_fkey",
+          "columns": [
+            "post_id"
+          ],
+          "refTable": "posts",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "post_tags",
+      "columns": [
+        {
+          "name": "post_id",
+          "type": "bigint"
+        },
+        {
+          "name": "tag_id",
+          "type": "bigint"
+        }
+      ],
+      "primaryKey": {
+        "name": "post_tags_pkey",
+        "columns": [
+          "post_id",
+          "tag_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "post_tags_tag_id_idx",
+          "parts": [
+            {
+              "column": "tag_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "post_tags_post_id_fkey",
+          "columns": [
+            "post_id"
+          ],
+          "refTable": "posts",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "name": "post_tags_tag_id_fkey",
+          "columns": [
+            "tag_id"
+          ],
+          "refTable": "tags",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "posts",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "author_id",
+          "type": "bigint"
+        },
+        {
+          "name": "title",
+          "type": "text"
+        },
+        {
+          "name": "slug",
+          "type": "text"
+        },
+        {
+          "name": "body",
+          "type": "text"
+        },
+        {
+          "name": "published_at",
+          "type": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "deleted_at",
+          "type": "timestamptz",
+          "nullable": true
+        }
+      ],
+      "primaryKey": {
+        "name": "posts_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "posts_slug_key",
+          "columns": [
+            "slug"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "posts_author_id_idx",
+          "parts": [
+            {
+              "column": "author_id"
+            }
+          ]
+        },
+        {
+          "name": "posts_published_idx",
+          "parts": [
+            {
+              "column": "published_at",
+              "desc": true
+            }
+          ],
+          "where": "deleted_at IS NULL"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "posts_author_id_fkey",
+          "columns": [
+            "author_id"
+          ],
+          "refTable": "users",
+          "refColumns": [
+            "id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "tags",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "text"
+        }
+      ],
+      "primaryKey": {
+        "name": "tags_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "tags_name_key",
+          "columns": [
+            "name"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "email",
+          "type": "text"
+        },
+        {
+          "name": "about",
+          "type": "text",
+          "nullable": true
+        }
+      ],
+      "primaryKey": {
+        "name": "users_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "users_email_key",
+          "columns": [
+            "email"
+          ]
+        }
+      ]
+    }
+  ]
+}
