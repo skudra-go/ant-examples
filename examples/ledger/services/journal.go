@@ -185,7 +185,7 @@ func (s *Journal) post(
 		entry.Lines = append(entry.Lines, models.Line{AccountID: account.ID, Amount: line.Amount})
 	}
 
-	if err := ant.Add(tx, entry); err != nil {
+	if err := ant.Add(ctx, tx, entry); err != nil {
 		return nil, err
 	}
 
@@ -202,7 +202,7 @@ func (s *Journal) post(
 		},
 	}
 
-	if err := ant.Add(tx, message); err != nil {
+	if err := ant.Add(ctx, tx, message); err != nil {
 		return nil, err
 	}
 

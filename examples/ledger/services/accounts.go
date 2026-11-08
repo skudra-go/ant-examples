@@ -287,10 +287,12 @@ func (s *Accounts) Import(
 	}
 	top := attach(roots)
 
-	session.ClearTracked()
+	if err := session.ClearTracked(ctx); err != nil {
+		return 0, 0, err
+	}
 
 	for i := range top {
-		err := ant.TrackGraph(session, &top[i], func(n ant.GraphNode) ant.State {
+		err := ant.TrackGraph(ctx, session, &top[i], func(n ant.GraphNode) ant.State {
 			if n.HasKey {
 				updated++
 
