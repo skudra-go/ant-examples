@@ -9,7 +9,7 @@ import (
 	"github.com/skudra-go/ant/validate"
 )
 
-// Persons is the field probe for Person.
+// Persons is the probe for Person.
 var Persons = ant.Fields[Person]()
 
 // Role values: what happened to a person in an event.

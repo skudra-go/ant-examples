@@ -23,8 +23,8 @@ func Send(
 ) (int, error) {
 	sent := 0
 	err := db.Tx(ctx, func(tx *models.AppDB) error {
-		batch, err := tx.Outbox.Where(ant.IsNull(&models.Outboxes.PublishedAt)).
-			OrderBy(&models.Outboxes.ID).Limit(size).ForUpdate().SkipLocked().All(ctx)
+		batch, err := tx.Outbox.Where(ant.IsNull(&models.Messages.PublishedAt)).
+			OrderBy(&models.Messages.ID).Limit(size).ForUpdate().SkipLocked().All(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +45,8 @@ func Send(
 		}
 
 		now := time.Now().UTC()
-		_, err = tx.Outbox.Where(ant.In(&models.Outboxes.ID, ids...)).
-			Update(ctx, ant.Set(&models.Outboxes.PublishedAt, &now))
+		_, err = tx.Outbox.Where(ant.In(&models.Messages.ID, ids...)).
+			Update(ctx, ant.Set(&models.Messages.PublishedAt, &now))
 
 		return err
 	})

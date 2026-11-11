@@ -1,5 +1,5 @@
 # antfmt lives in the ant checkout next to this repository.
-EXAMPLES := examples/blog examples/audit examples/ledger
+EXAMPLES := examples/hello examples/blog examples/audit examples/ledger
 
 .PHONY: fmt lint
 

@@ -6,7 +6,7 @@ import (
 	"github.com/skudra-go/ant"
 )
 
-// Actors is the field probe for Actor.
+// Actors is the probe for Actor.
 var Actors = ant.Fields[Actor]()
 
 // Actor is who does things, kept up to date as events arrive. It outlives the
@@ -19,7 +19,7 @@ type Actor struct {
 	EventCount int64     `json:"eventCount"`
 }
 
-// DailyCounts is the field probe for DailyCount.
+// DailyCounts is the probe for DailyCount.
 var DailyCounts = ant.Fields[DailyCount]()
 
 // DailyCount is a running total, kept on ingest so that a year of statistics reads
@@ -45,7 +45,7 @@ func (DailyCount) Configure(b *ant.ModelBuilder[DailyCount]) {
 	b.Column(&DailyCounts.Outcome).Type("event_outcome")
 }
 
-// PersonOverviews is the field probe for PersonOverview.
+// PersonOverviews is the probe for PersonOverview.
 var PersonOverviews = ant.Fields[PersonOverview]()
 
 // PersonOverview is a row of the person_overviews view, defined in

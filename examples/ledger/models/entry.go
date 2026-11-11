@@ -9,10 +9,10 @@ import (
 	"github.com/skudra-go/ant"
 )
 
-// Entries is the field probe for Entry.
+// Entries is the probe for Entry.
 var Entries = ant.Fields[Entry]()
 
-// Lines is the field probe for Line.
+// Lines is the probe for Line.
 var Lines = ant.Fields[Line]()
 
 // ErrUnbalanced reports an entry whose lines do not add up to zero.

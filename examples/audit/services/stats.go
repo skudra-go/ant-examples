@@ -27,7 +27,7 @@ type Bucket struct {
 	Persons int64     `json:"persons"`
 }
 
-// Buckets is the field probe for Bucket.
+// Buckets is the probe for Bucket.
 var Buckets = ant.Fields[Bucket]()
 
 // units holds the groupings Activity allows. The unit is written into the SQL and
@@ -86,7 +86,7 @@ type Total struct {
 	Share   int64  `json:"sharePercent"`
 }
 
-// Totals is the field probe for Total.
+// Totals is the probe for Total.
 var Totals = ant.Fields[Total]()
 
 // Rollup reads the running totals, which survive after their partitions are gone.
@@ -126,7 +126,7 @@ type ActorRow struct {
 	Rank    int64  `json:"rank"`
 }
 
-// ActorRows is the field probe for ActorRow.
+// ActorRows is the probe for ActorRow.
 var ActorRows = ant.Fields[ActorRow]()
 
 // TopActors ranks actors by how many people they touched. RANK runs over the
@@ -160,7 +160,7 @@ type Finding struct {
 	Count  int64  `json:"count"`
 }
 
-// Findings is the field probe for Finding.
+// Findings is the probe for Finding.
 var Findings = ant.Fields[Finding]()
 
 // Anomalies finds two kinds of behaviour, and combines them.

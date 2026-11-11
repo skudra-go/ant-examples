@@ -2,7 +2,7 @@ package models
 
 import "github.com/skudra-go/ant"
 
-// Comments is the field probe for Comment.
+// Comments is the probe for Comment.
 var Comments = ant.Fields[Comment]()
 
 // Comment is a reader's reply to a post.

@@ -6,7 +6,7 @@ import (
 	"github.com/skudra-go/ant"
 )
 
-// Posts is the field probe for Post.
+// Posts is the probe for Post.
 var Posts = ant.Fields[Post]()
 
 // Post is an article. Soft deleted, since comments and links outlive a change of

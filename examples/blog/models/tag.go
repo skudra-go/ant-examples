@@ -2,7 +2,7 @@ package models
 
 import "github.com/skudra-go/ant"
 
-// Tags is the field probe for Tag.
+// Tags is the probe for Tag.
 var Tags = ant.Fields[Tag]()
 
 // Tag groups posts.
