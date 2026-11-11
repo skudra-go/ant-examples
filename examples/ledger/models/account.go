@@ -8,7 +8,7 @@ import (
 	"github.com/skudra-go/ant/validate"
 )
 
-// Accounts is the field probe for Account.
+// Accounts is the probe for Account.
 var Accounts = ant.Fields[Account]()
 
 // Kind values. Assets and expenses grow with debits, and the rest with credits,

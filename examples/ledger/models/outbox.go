@@ -6,8 +6,8 @@ import (
 	"github.com/skudra-go/ant"
 )
 
-// Outboxes is the field probe for Message.
-var Outboxes = ant.Fields[Message]()
+// Messages is the probe for Message.
+var Messages = ant.Fields[Message]()
 
 // Message is something to tell the outside world. It is written in the same
 // transaction as the change it describes, so a message exists exactly when the money
@@ -25,10 +25,10 @@ type Message struct {
 // Configure says what the struct cannot.
 func (Message) Configure(b *ant.ModelBuilder[Message]) {
 	b.Table("outbox")
-	b.Index(&Outboxes.ID).Where("published_at IS NULL").Name("outbox_pending_idx")
+	b.Index(&Messages.ID).Where("published_at IS NULL").Name("outbox_pending_idx")
 }
 
-// StatementLines is the field probe for StatementLine.
+// StatementLines is the probe for StatementLine.
 var StatementLines = ant.Fields[StatementLine]()
 
 // StatementLine is one line of a bank statement, kept to reconcile against.
@@ -71,5 +71,5 @@ func (StagedLine) Configure(b *ant.ModelBuilder[StagedLine]) {
 	b.Column(&StagedLines.BookedOn).Type("date")
 }
 
-// StagedLines is the field probe for StagedLine.
+// StagedLines is the probe for StagedLine.
 var StagedLines = ant.Fields[StagedLine]()

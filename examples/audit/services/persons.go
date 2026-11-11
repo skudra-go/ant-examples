@@ -45,8 +45,8 @@ type Step struct {
 	GapHours *float64 `json:"gapHours,omitempty"`
 }
 
-// StepFields is the field probe for Step.
-var StepFields = ant.Fields[Step]()
+// Steps is the probe for Step.
+var Steps = ant.Fields[Step]()
 
 // Timeline returns what happened to a person, oldest first. The join names both
 // key columns, so PostgreSQL pairs each month with its own month instead of searching
@@ -63,14 +63,14 @@ func (s *Persons) Timeline(ctx context.Context, ref string, limit int) ([]Step, 
 		ant.EqCol(&models.Persons.OccurredAt, &models.Events.OccurredAt))
 
 	steps, err := ant.Project[Step](joined,
-		ant.Into(&StepFields.EventID, &models.Events.ID),
-		ant.Into(&StepFields.At, &models.Persons.OccurredAt),
-		ant.Into(&StepFields.Service, &models.Events.Service),
-		ant.Into(&StepFields.Action, &models.Events.Action),
-		ant.Into(&StepFields.Actor, &models.Events.ActorName),
-		ant.Into(&StepFields.Role, &models.Persons.Role),
-		ant.IntoExpr(&StepFields.Number, ant.RowNumber().Over(byTime)),
-		ant.IntoExpr(&StepFields.Previous, ant.Lag(&models.Persons.OccurredAt).Over(byTime)),
+		ant.Into(&Steps.EventID, &models.Events.ID),
+		ant.Into(&Steps.At, &models.Persons.OccurredAt),
+		ant.Into(&Steps.Service, &models.Events.Service),
+		ant.Into(&Steps.Action, &models.Events.Action),
+		ant.Into(&Steps.Actor, &models.Events.ActorName),
+		ant.Into(&Steps.Role, &models.Persons.Role),
+		ant.IntoExpr(&Steps.Number, ant.RowNumber().Over(byTime)),
+		ant.IntoExpr(&Steps.Previous, ant.Lag(&models.Persons.OccurredAt).Over(byTime)),
 	).All(ctx)
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ type RoleCount struct {
 	Actors int64  `json:"actors"`
 }
 
-// RoleCounts is the field probe for RoleCount.
+// RoleCounts is the probe for RoleCount.
 var RoleCounts = ant.Fields[RoleCount]()
 
 // Summary is everything known about a person in aggregate.

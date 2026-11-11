@@ -52,7 +52,7 @@ type TrialLine struct {
 	Net     models.Money `json:"net"`
 }
 
-// TrialLines is the field probe for TrialLine.
+// TrialLines is the probe for TrialLine.
 var TrialLines = ant.Fields[TrialLine]()
 
 // TrialBalance adds up every line per account, as of a date. Debits and credits come

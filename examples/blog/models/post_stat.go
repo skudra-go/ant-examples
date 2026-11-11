@@ -2,7 +2,7 @@ package models
 
 import "github.com/skudra-go/ant"
 
-// PostStats is the field probe for PostStat.
+// PostStats is the probe for PostStat.
 var PostStats = ant.Fields[PostStat]()
 
 // PostStat is a row of the post_stats view, which is defined in

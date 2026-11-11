@@ -27,7 +27,7 @@ func TenantOf(ctx context.Context) (int64, error) {
 	return 0, ErrNoTenant
 }
 
-// Tenants is the field probe for Tenant.
+// Tenants is the probe for Tenant.
 var Tenants = ant.Fields[Tenant]()
 
 // Tenant is a customer of this service.

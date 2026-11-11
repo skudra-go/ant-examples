@@ -8,7 +8,7 @@ import (
 	"github.com/skudra-go/ant/validate"
 )
 
-// Events is the field probe for Event.
+// Events is the probe for Event.
 var Events = ant.Fields[Event]()
 
 // Outcome values.
