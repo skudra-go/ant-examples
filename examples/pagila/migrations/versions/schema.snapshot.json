@@ -1,0 +1,1084 @@
+{
+  "format": 1,
+  "dialect": "postgres",
+  "latest": "0002_add_imdb_and_reviews",
+  "enums": [
+    {
+      "name": "mpaa_rating",
+      "values": [
+        "G",
+        "PG",
+        "PG-13",
+        "R",
+        "NC-17"
+      ]
+    }
+  ],
+  "sequences": [
+    {
+      "name": "payment_payment_id_seq",
+      "start": 1,
+      "increment": 1
+    }
+  ],
+  "tables": [
+    {
+      "name": "actor",
+      "columns": [
+        {
+          "name": "actor_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "first_name",
+          "type": "text"
+        },
+        {
+          "name": "last_name",
+          "type": "text"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "actor_pkey",
+        "columns": [
+          "actor_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_actor_last_name",
+          "parts": [
+            {
+              "column": "last_name"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "address",
+      "columns": [
+        {
+          "name": "address_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "address",
+          "type": "text"
+        },
+        {
+          "name": "address2",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "district",
+          "type": "text"
+        },
+        {
+          "name": "city_id",
+          "type": "integer"
+        },
+        {
+          "name": "postal_code",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "phone",
+          "type": "text"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "address_pkey",
+        "columns": [
+          "address_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_fk_city_id",
+          "parts": [
+            {
+              "column": "city_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "address_city_id_fkey",
+          "columns": [
+            "city_id"
+          ],
+          "refTable": "city",
+          "refColumns": [
+            "city_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "category",
+      "columns": [
+        {
+          "name": "category_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "category_pkey",
+        "columns": [
+          "category_id"
+        ]
+      }
+    },
+    {
+      "name": "city",
+      "columns": [
+        {
+          "name": "city_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "city",
+          "type": "text"
+        },
+        {
+          "name": "country_id",
+          "type": "integer"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "city_pkey",
+        "columns": [
+          "city_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_fk_country_id",
+          "parts": [
+            {
+              "column": "country_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "city_country_id_fkey",
+          "columns": [
+            "country_id"
+          ],
+          "refTable": "country",
+          "refColumns": [
+            "country_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "country",
+      "columns": [
+        {
+          "name": "country_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "country",
+          "type": "text"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "country_pkey",
+        "columns": [
+          "country_id"
+        ]
+      }
+    },
+    {
+      "name": "customer",
+      "columns": [
+        {
+          "name": "customer_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "store_id",
+          "type": "integer"
+        },
+        {
+          "name": "first_name",
+          "type": "text"
+        },
+        {
+          "name": "last_name",
+          "type": "text"
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "address_id",
+          "type": "integer"
+        },
+        {
+          "name": "activebool",
+          "type": "boolean",
+          "default": "true"
+        },
+        {
+          "name": "create_date",
+          "type": "date",
+          "default": "CURRENT_DATE"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        },
+        {
+          "name": "active",
+          "type": "integer",
+          "nullable": true
+        }
+      ],
+      "primaryKey": {
+        "name": "customer_pkey",
+        "columns": [
+          "customer_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_fk_address_id",
+          "parts": [
+            {
+              "column": "address_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_fk_store_id",
+          "parts": [
+            {
+              "column": "store_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_last_name",
+          "parts": [
+            {
+              "column": "last_name"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "customer_address_id_fkey",
+          "columns": [
+            "address_id"
+          ],
+          "refTable": "address",
+          "refColumns": [
+            "address_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "customer_store_id_fkey",
+          "columns": [
+            "store_id"
+          ],
+          "refTable": "store",
+          "refColumns": [
+            "store_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "film",
+      "columns": [
+        {
+          "name": "film_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "title",
+          "type": "text"
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "release_year",
+          "type": "year",
+          "nullable": true
+        },
+        {
+          "name": "language_id",
+          "type": "integer"
+        },
+        {
+          "name": "original_language_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "rental_duration",
+          "type": "smallint",
+          "default": "3"
+        },
+        {
+          "name": "rental_rate",
+          "type": "numeric(4,2)",
+          "default": "4.99"
+        },
+        {
+          "name": "length",
+          "type": "smallint",
+          "nullable": true
+        },
+        {
+          "name": "replacement_cost",
+          "type": "numeric(5,2)",
+          "default": "19.99"
+        },
+        {
+          "name": "rating",
+          "type": "mpaa_rating",
+          "nullable": true,
+          "default": "'G'::mpaa_rating"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        },
+        {
+          "name": "special_features",
+          "type": "text[]",
+          "nullable": true
+        },
+        {
+          "name": "fulltext",
+          "type": "tsvector"
+        },
+        {
+          "name": "imdb_id",
+          "type": "text",
+          "nullable": true
+        }
+      ],
+      "primaryKey": {
+        "name": "film_pkey",
+        "columns": [
+          "film_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "film_fulltext_idx",
+          "parts": [
+            {
+              "column": "fulltext"
+            }
+          ],
+          "method": "gist"
+        },
+        {
+          "name": "film_imdb_id_idx",
+          "parts": [
+            {
+              "column": "imdb_id"
+            }
+          ],
+          "unique": true,
+          "where": "imdb_id IS NOT NULL"
+        },
+        {
+          "name": "idx_fk_language_id",
+          "parts": [
+            {
+              "column": "language_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_fk_original_language_id",
+          "parts": [
+            {
+              "column": "original_language_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_title",
+          "parts": [
+            {
+              "column": "title"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "film_language_id_fkey",
+          "columns": [
+            "language_id"
+          ],
+          "refTable": "language",
+          "refColumns": [
+            "language_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "film_original_language_id_fkey",
+          "columns": [
+            "original_language_id"
+          ],
+          "refTable": "language",
+          "refColumns": [
+            "language_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "film_actor",
+      "columns": [
+        {
+          "name": "actor_id",
+          "type": "integer"
+        },
+        {
+          "name": "film_id",
+          "type": "integer"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "film_actor_pkey",
+        "columns": [
+          "actor_id",
+          "film_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_fk_film_id",
+          "parts": [
+            {
+              "column": "film_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "film_actor_actor_id_fkey",
+          "columns": [
+            "actor_id"
+          ],
+          "refTable": "actor",
+          "refColumns": [
+            "actor_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "film_actor_film_id_fkey",
+          "columns": [
+            "film_id"
+          ],
+          "refTable": "film",
+          "refColumns": [
+            "film_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "film_category",
+      "columns": [
+        {
+          "name": "film_id",
+          "type": "integer"
+        },
+        {
+          "name": "category_id",
+          "type": "integer"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "film_category_pkey",
+        "columns": [
+          "film_id",
+          "category_id"
+        ]
+      },
+      "foreignKeys": [
+        {
+          "name": "film_category_category_id_fkey",
+          "columns": [
+            "category_id"
+          ],
+          "refTable": "category",
+          "refColumns": [
+            "category_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "film_category_film_id_fkey",
+          "columns": [
+            "film_id"
+          ],
+          "refTable": "film",
+          "refColumns": [
+            "film_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "film_review",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "film_id",
+          "type": "integer"
+        },
+        {
+          "name": "customer_id",
+          "type": "integer"
+        },
+        {
+          "name": "stars",
+          "type": "smallint"
+        },
+        {
+          "name": "body",
+          "type": "text"
+        }
+      ],
+      "primaryKey": {
+        "name": "film_review_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "checks": [
+        {
+          "name": "film_review_stars_check",
+          "expr": "stars BETWEEN 1 AND 5"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "film_review_customer_id_idx",
+          "parts": [
+            {
+              "column": "customer_id"
+            }
+          ]
+        },
+        {
+          "name": "film_review_film_id_idx",
+          "parts": [
+            {
+              "column": "film_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "film_review_customer_id_fkey",
+          "columns": [
+            "customer_id"
+          ],
+          "refTable": "customer",
+          "refColumns": [
+            "customer_id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "name": "film_review_film_id_fkey",
+          "columns": [
+            "film_id"
+          ],
+          "refTable": "film",
+          "refColumns": [
+            "film_id"
+          ],
+          "onDelete": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "inventory",
+      "columns": [
+        {
+          "name": "inventory_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "film_id",
+          "type": "integer"
+        },
+        {
+          "name": "store_id",
+          "type": "integer"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "inventory_pkey",
+        "columns": [
+          "inventory_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_store_id_film_id",
+          "parts": [
+            {
+              "column": "store_id"
+            },
+            {
+              "column": "film_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "inventory_film_id_fkey",
+          "columns": [
+            "film_id"
+          ],
+          "refTable": "film",
+          "refColumns": [
+            "film_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "inventory_store_id_fkey",
+          "columns": [
+            "store_id"
+          ],
+          "refTable": "store",
+          "refColumns": [
+            "store_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "language",
+      "columns": [
+        {
+          "name": "language_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "char(20)"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "language_pkey",
+        "columns": [
+          "language_id"
+        ]
+      }
+    },
+    {
+      "name": "payment",
+      "partition": {
+        "method": "RANGE",
+        "columns": [
+          "payment_date"
+        ]
+      },
+      "columns": [
+        {
+          "name": "payment_id",
+          "type": "integer",
+          "default": "nextval('payment_payment_id_seq')"
+        },
+        {
+          "name": "customer_id",
+          "type": "integer"
+        },
+        {
+          "name": "staff_id",
+          "type": "integer"
+        },
+        {
+          "name": "rental_id",
+          "type": "integer"
+        },
+        {
+          "name": "amount",
+          "type": "numeric(5,2)"
+        },
+        {
+          "name": "payment_date",
+          "type": "timestamptz"
+        }
+      ],
+      "primaryKey": {
+        "name": "payment_pkey",
+        "columns": [
+          "payment_date",
+          "payment_id"
+        ]
+      }
+    },
+    {
+      "name": "rental",
+      "columns": [
+        {
+          "name": "rental_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "rental_date",
+          "type": "timestamptz"
+        },
+        {
+          "name": "inventory_id",
+          "type": "integer"
+        },
+        {
+          "name": "customer_id",
+          "type": "integer"
+        },
+        {
+          "name": "return_date",
+          "type": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "staff_id",
+          "type": "integer"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "rental_pkey",
+        "columns": [
+          "rental_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_fk_inventory_id",
+          "parts": [
+            {
+              "column": "inventory_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_unq_rental_rental_date_inventory_id_customer_id",
+          "parts": [
+            {
+              "column": "rental_date"
+            },
+            {
+              "column": "inventory_id"
+            },
+            {
+              "column": "customer_id"
+            }
+          ],
+          "unique": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "rental_customer_id_fkey",
+          "columns": [
+            "customer_id"
+          ],
+          "refTable": "customer",
+          "refColumns": [
+            "customer_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "rental_inventory_id_fkey",
+          "columns": [
+            "inventory_id"
+          ],
+          "refTable": "inventory",
+          "refColumns": [
+            "inventory_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "rental_staff_id_fkey",
+          "columns": [
+            "staff_id"
+          ],
+          "refTable": "staff",
+          "refColumns": [
+            "staff_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "staff",
+      "columns": [
+        {
+          "name": "staff_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "first_name",
+          "type": "text"
+        },
+        {
+          "name": "last_name",
+          "type": "text"
+        },
+        {
+          "name": "address_id",
+          "type": "integer"
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "store_id",
+          "type": "integer"
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "default": "true"
+        },
+        {
+          "name": "username",
+          "type": "text"
+        },
+        {
+          "name": "password",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        },
+        {
+          "name": "picture",
+          "type": "bytea",
+          "nullable": true
+        }
+      ],
+      "primaryKey": {
+        "name": "staff_pkey",
+        "columns": [
+          "staff_id"
+        ]
+      },
+      "foreignKeys": [
+        {
+          "name": "staff_address_id_fkey",
+          "columns": [
+            "address_id"
+          ],
+          "refTable": "address",
+          "refColumns": [
+            "address_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "staff_store_id_fkey",
+          "columns": [
+            "store_id"
+          ],
+          "refTable": "store",
+          "refColumns": [
+            "store_id"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "store",
+      "columns": [
+        {
+          "name": "store_id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "manager_staff_id",
+          "type": "integer"
+        },
+        {
+          "name": "address_id",
+          "type": "integer"
+        },
+        {
+          "name": "last_update",
+          "type": "timestamptz",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "store_pkey",
+        "columns": [
+          "store_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_unq_manager_staff_id",
+          "parts": [
+            {
+              "column": "manager_staff_id"
+            }
+          ],
+          "unique": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "store_address_id_fkey",
+          "columns": [
+            "address_id"
+          ],
+          "refTable": "address",
+          "refColumns": [
+            "address_id"
+          ],
+          "onDelete": "RESTRICT",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1559 @@
+{
+  "format": 1,
+  "dialect": "postgres",
+  "enums": [
+    {
+      "name": "bounce_type",
+      "values": [
+        "soft",
+        "hard",
+        "complaint"
+      ]
+    },
+    {
+      "name": "campaign_status",
+      "values": [
+        "draft",
+        "running",
+        "scheduled",
+        "paused",
+        "cancelled",
+        "finished"
+      ]
+    },
+    {
+      "name": "campaign_type",
+      "values": [
+        "regular",
+        "optin"
+      ]
+    },
+    {
+      "name": "content_type",
+      "values": [
+        "richtext",
+        "html",
+        "plain",
+        "markdown",
+        "visual"
+      ]
+    },
+    {
+      "name": "list_optin",
+      "values": [
+        "single",
+        "double"
+      ]
+    },
+    {
+      "name": "list_type",
+      "values": [
+        "public",
+        "private",
+        "temporary"
+      ]
+    },
+    {
+      "name": "role_type",
+      "values": [
+        "user",
+        "list"
+      ]
+    },
+    {
+      "name": "subscriber_status",
+      "values": [
+        "enabled",
+        "disabled",
+        "blocklisted"
+      ]
+    },
+    {
+      "name": "subscription_status",
+      "values": [
+        "unconfirmed",
+        "confirmed",
+        "unsubscribed"
+      ]
+    },
+    {
+      "name": "template_type",
+      "values": [
+        "campaign",
+        "campaign_visual",
+        "tx"
+      ]
+    },
+    {
+      "name": "user_status",
+      "values": [
+        "enabled",
+        "disabled"
+      ]
+    },
+    {
+      "name": "user_type",
+      "values": [
+        "user",
+        "api"
+      ]
+    }
+  ],
+  "tables": [
+    {
+      "name": "bounces",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "subscriber_id",
+          "type": "integer"
+        },
+        {
+          "name": "campaign_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "type",
+          "type": "bounce_type",
+          "default": "'hard'::bounce_type"
+        },
+        {
+          "name": "source",
+          "type": "text",
+          "default": "''::text"
+        },
+        {
+          "name": "meta",
+          "type": "jsonb",
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "bounces_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_bounces_camp_id",
+          "parts": [
+            {
+              "column": "campaign_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_bounces_date",
+          "parts": [
+            {
+              "expr": "((timezone('UTC'::text, created_at))::date)"
+            }
+          ]
+        },
+        {
+          "name": "idx_bounces_source",
+          "parts": [
+            {
+              "column": "source"
+            }
+          ]
+        },
+        {
+          "name": "idx_bounces_sub_id",
+          "parts": [
+            {
+              "column": "subscriber_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "bounces_campaign_id_fkey",
+          "columns": [
+            "campaign_id"
+          ],
+          "refTable": "campaigns",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "bounces_subscriber_id_fkey",
+          "columns": [
+            "subscriber_id"
+          ],
+          "refTable": "subscribers",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "campaign_lists",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "campaign_id",
+          "type": "integer"
+        },
+        {
+          "name": "list_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "list_name",
+          "type": "text",
+          "default": "''::text"
+        }
+      ],
+      "primaryKey": {
+        "name": "campaign_lists_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "campaign_lists_campaign_id_list_id_idx",
+          "parts": [
+            {
+              "column": "campaign_id"
+            },
+            {
+              "column": "list_id"
+            }
+          ],
+          "unique": true
+        },
+        {
+          "name": "idx_camp_lists_camp_id",
+          "parts": [
+            {
+              "column": "campaign_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_camp_lists_list_id",
+          "parts": [
+            {
+              "column": "list_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "campaign_lists_campaign_id_fkey",
+          "columns": [
+            "campaign_id"
+          ],
+          "refTable": "campaigns",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "campaign_lists_list_id_fkey",
+          "columns": [
+            "list_id"
+          ],
+          "refTable": "lists",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "campaign_media",
+      "columns": [
+        {
+          "name": "campaign_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "media_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "filename",
+          "type": "text",
+          "default": "''::text"
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_camp_media_camp_id",
+          "parts": [
+            {
+              "column": "campaign_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_camp_media_id",
+          "parts": [
+            {
+              "column": "campaign_id"
+            },
+            {
+              "column": "media_id"
+            }
+          ],
+          "unique": true
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "campaign_media_campaign_id_fkey",
+          "columns": [
+            "campaign_id"
+          ],
+          "refTable": "campaigns",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "campaign_media_media_id_fkey",
+          "columns": [
+            "media_id"
+          ],
+          "refTable": "media",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "campaign_views",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "campaign_id",
+          "type": "integer"
+        },
+        {
+          "name": "subscriber_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "campaign_views_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_views_camp_id",
+          "parts": [
+            {
+              "column": "campaign_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_views_date",
+          "parts": [
+            {
+              "expr": "((timezone('UTC'::text, created_at))::date)"
+            }
+          ]
+        },
+        {
+          "name": "idx_views_subscriber_id",
+          "parts": [
+            {
+              "column": "subscriber_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "campaign_views_campaign_id_fkey",
+          "columns": [
+            "campaign_id"
+          ],
+          "refTable": "campaigns",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "campaign_views_subscriber_id_fkey",
+          "columns": [
+            "subscriber_id"
+          ],
+          "refTable": "subscribers",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "campaigns",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "uuid",
+          "type": "uuid"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "subject",
+          "type": "text"
+        },
+        {
+          "name": "from_email",
+          "type": "text"
+        },
+        {
+          "name": "body",
+          "type": "text"
+        },
+        {
+          "name": "body_source",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "altbody",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "content_type",
+          "type": "content_type",
+          "default": "'richtext'::content_type"
+        },
+        {
+          "name": "send_at",
+          "type": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "headers",
+          "type": "jsonb",
+          "default": "'[]'::jsonb"
+        },
+        {
+          "name": "status",
+          "type": "campaign_status",
+          "default": "'draft'::campaign_status"
+        },
+        {
+          "name": "tags",
+          "type": "character varying(100)[]",
+          "nullable": true
+        },
+        {
+          "name": "type",
+          "type": "campaign_type",
+          "nullable": true,
+          "default": "'regular'::campaign_type"
+        },
+        {
+          "name": "messenger",
+          "type": "text"
+        },
+        {
+          "name": "template_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "to_send",
+          "type": "integer",
+          "default": "0"
+        },
+        {
+          "name": "sent",
+          "type": "integer",
+          "default": "0"
+        },
+        {
+          "name": "max_subscriber_id",
+          "type": "integer",
+          "default": "0"
+        },
+        {
+          "name": "last_subscriber_id",
+          "type": "integer",
+          "default": "0"
+        },
+        {
+          "name": "archive",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "archive_slug",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "archive_template_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "archive_meta",
+          "type": "jsonb",
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "started_at",
+          "type": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "campaigns_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "campaigns_archive_slug_key",
+          "columns": [
+            "archive_slug"
+          ]
+        },
+        {
+          "name": "campaigns_uuid_key",
+          "columns": [
+            "uuid"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_camps_created_at",
+          "parts": [
+            {
+              "column": "created_at"
+            }
+          ]
+        },
+        {
+          "name": "idx_camps_name",
+          "parts": [
+            {
+              "column": "name"
+            }
+          ]
+        },
+        {
+          "name": "idx_camps_status",
+          "parts": [
+            {
+              "column": "status"
+            }
+          ]
+        },
+        {
+          "name": "idx_camps_updated_at",
+          "parts": [
+            {
+              "column": "updated_at"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "campaigns_archive_template_id_fkey",
+          "columns": [
+            "archive_template_id"
+          ],
+          "refTable": "templates",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        },
+        {
+          "name": "campaigns_template_id_fkey",
+          "columns": [
+            "template_id"
+          ],
+          "refTable": "templates",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL"
+        }
+      ]
+    },
+    {
+      "name": "link_clicks",
+      "columns": [
+        {
+          "name": "id",
+          "type": "bigint",
+          "identity": true
+        },
+        {
+          "name": "campaign_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "link_id",
+          "type": "integer"
+        },
+        {
+          "name": "subscriber_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "link_clicks_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_clicks_camp_id",
+          "parts": [
+            {
+              "column": "campaign_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_clicks_date",
+          "parts": [
+            {
+              "expr": "((timezone('UTC'::text, created_at))::date)"
+            }
+          ]
+        },
+        {
+          "name": "idx_clicks_link_id",
+          "parts": [
+            {
+              "column": "link_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_clicks_sub_id",
+          "parts": [
+            {
+              "column": "subscriber_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "link_clicks_campaign_id_fkey",
+          "columns": [
+            "campaign_id"
+          ],
+          "refTable": "campaigns",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "link_clicks_link_id_fkey",
+          "columns": [
+            "link_id"
+          ],
+          "refTable": "links",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "link_clicks_subscriber_id_fkey",
+          "columns": [
+            "subscriber_id"
+          ],
+          "refTable": "subscribers",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "SET NULL",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "links",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "uuid",
+          "type": "uuid"
+        },
+        {
+          "name": "url",
+          "type": "text"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "links_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "links_url_key",
+          "columns": [
+            "url"
+          ]
+        },
+        {
+          "name": "links_uuid_key",
+          "columns": [
+            "uuid"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "lists",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "uuid",
+          "type": "uuid"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "type",
+          "type": "list_type"
+        },
+        {
+          "name": "optin",
+          "type": "list_optin",
+          "default": "'single'::list_optin"
+        },
+        {
+          "name": "tags",
+          "type": "character varying(100)[]",
+          "nullable": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "default": "''::text"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "lists_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "lists_uuid_key",
+          "columns": [
+            "uuid"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_lists_created_at",
+          "parts": [
+            {
+              "column": "created_at"
+            }
+          ]
+        },
+        {
+          "name": "idx_lists_name",
+          "parts": [
+            {
+              "column": "name"
+            }
+          ]
+        },
+        {
+          "name": "idx_lists_optin",
+          "parts": [
+            {
+              "column": "optin"
+            }
+          ]
+        },
+        {
+          "name": "idx_lists_type",
+          "parts": [
+            {
+              "column": "type"
+            }
+          ]
+        },
+        {
+          "name": "idx_lists_updated_at",
+          "parts": [
+            {
+              "column": "updated_at"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "media",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "uuid",
+          "type": "uuid"
+        },
+        {
+          "name": "provider",
+          "type": "text",
+          "default": "''::text"
+        },
+        {
+          "name": "filename",
+          "type": "text"
+        },
+        {
+          "name": "content_type",
+          "type": "text",
+          "default": "'application/octet-stream'::text"
+        },
+        {
+          "name": "thumb",
+          "type": "text"
+        },
+        {
+          "name": "meta",
+          "type": "jsonb",
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "media_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "media_uuid_key",
+          "columns": [
+            "uuid"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_media_filename",
+          "parts": [
+            {
+              "column": "provider"
+            },
+            {
+              "column": "filename"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "roles",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "type",
+          "type": "role_type",
+          "default": "'user'::role_type"
+        },
+        {
+          "name": "parent_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "list_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "permissions",
+          "type": "text[]",
+          "default": "'{}'::text[]"
+        },
+        {
+          "name": "name",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "roles_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_roles",
+          "parts": [
+            {
+              "column": "parent_id"
+            },
+            {
+              "column": "list_id"
+            }
+          ],
+          "unique": true
+        },
+        {
+          "name": "idx_roles_name",
+          "parts": [
+            {
+              "column": "type"
+            },
+            {
+              "column": "name"
+            }
+          ],
+          "unique": true,
+          "where": "name IS NOT NULL"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "roles_list_id_fkey",
+          "columns": [
+            "list_id"
+          ],
+          "refTable": "lists",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "roles_parent_id_fkey",
+          "columns": [
+            "parent_id"
+          ],
+          "refTable": "roles",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "sessions",
+      "columns": [
+        {
+          "name": "id",
+          "type": "text"
+        },
+        {
+          "name": "data",
+          "type": "jsonb",
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamp without time zone",
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "sessions_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_sessions",
+          "parts": [
+            {
+              "column": "id"
+            },
+            {
+              "column": "created_at"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "settings",
+      "columns": [
+        {
+          "name": "key",
+          "type": "text"
+        },
+        {
+          "name": "value",
+          "type": "jsonb",
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "uniques": [
+        {
+          "name": "settings_key_key",
+          "columns": [
+            "key"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_settings_key",
+          "parts": [
+            {
+              "column": "key"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "subscriber_lists",
+      "columns": [
+        {
+          "name": "subscriber_id",
+          "type": "integer"
+        },
+        {
+          "name": "list_id",
+          "type": "integer"
+        },
+        {
+          "name": "meta",
+          "type": "jsonb",
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "status",
+          "type": "subscription_status",
+          "default": "'unconfirmed'::subscription_status"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "subscriber_lists_pkey",
+        "columns": [
+          "subscriber_id",
+          "list_id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "idx_sub_lists_list_id",
+          "parts": [
+            {
+              "column": "list_id"
+            }
+          ]
+        },
+        {
+          "name": "idx_sub_lists_status",
+          "parts": [
+            {
+              "column": "status"
+            }
+          ]
+        },
+        {
+          "name": "idx_sub_lists_sub_id",
+          "parts": [
+            {
+              "column": "subscriber_id"
+            }
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "subscriber_lists_list_id_fkey",
+          "columns": [
+            "list_id"
+          ],
+          "refTable": "lists",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        },
+        {
+          "name": "subscriber_lists_subscriber_id_fkey",
+          "columns": [
+            "subscriber_id"
+          ],
+          "refTable": "subscribers",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE",
+          "onUpdate": "CASCADE"
+        }
+      ]
+    },
+    {
+      "name": "subscribers",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "uuid",
+          "type": "uuid"
+        },
+        {
+          "name": "email",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "attribs",
+          "type": "jsonb",
+          "default": "'{}'::jsonb"
+        },
+        {
+          "name": "status",
+          "type": "subscriber_status",
+          "default": "'enabled'::subscriber_status"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "subscribers_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "subscribers_email_key",
+          "columns": [
+            "email"
+          ]
+        },
+        {
+          "name": "subscribers_uuid_key",
+          "columns": [
+            "uuid"
+          ]
+        }
+      ],
+      "indexes": [
+        {
+          "name": "idx_subs_created_at",
+          "parts": [
+            {
+              "column": "created_at"
+            }
+          ]
+        },
+        {
+          "name": "idx_subs_email",
+          "parts": [
+            {
+              "expr": "lower(email)"
+            }
+          ],
+          "unique": true
+        },
+        {
+          "name": "idx_subs_id_status",
+          "parts": [
+            {
+              "column": "id"
+            },
+            {
+              "column": "status"
+            }
+          ]
+        },
+        {
+          "name": "idx_subs_status",
+          "parts": [
+            {
+              "column": "status"
+            }
+          ]
+        },
+        {
+          "name": "idx_subs_updated_at",
+          "parts": [
+            {
+              "column": "updated_at"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "templates",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "type",
+          "type": "template_type",
+          "default": "'campaign'::template_type"
+        },
+        {
+          "name": "subject",
+          "type": "text"
+        },
+        {
+          "name": "body",
+          "type": "text"
+        },
+        {
+          "name": "body_source",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "is_default",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "templates_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "indexes": [
+        {
+          "name": "templates_is_default_idx",
+          "parts": [
+            {
+              "column": "is_default"
+            }
+          ],
+          "unique": true,
+          "where": "is_default = true"
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "integer",
+          "identity": true
+        },
+        {
+          "name": "username",
+          "type": "text"
+        },
+        {
+          "name": "password_login",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "password",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "email",
+          "type": "text"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "avatar",
+          "type": "text",
+          "nullable": true
+        },
+        {
+          "name": "type",
+          "type": "user_type",
+          "default": "'user'::user_type"
+        },
+        {
+          "name": "user_role_id",
+          "type": "integer"
+        },
+        {
+          "name": "list_role_id",
+          "type": "integer",
+          "nullable": true
+        },
+        {
+          "name": "status",
+          "type": "user_status",
+          "default": "'disabled'::user_status"
+        },
+        {
+          "name": "loggedin_at",
+          "type": "timestamptz",
+          "nullable": true
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "nullable": true,
+          "default": "now()"
+        }
+      ],
+      "primaryKey": {
+        "name": "users_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "users_email_key",
+          "columns": [
+            "email"
+          ]
+        },
+        {
+          "name": "users_username_key",
+          "columns": [
+            "username"
+          ]
+        }
+      ],
+      "foreignKeys": [
+        {
+          "name": "users_list_role_id_fkey",
+          "columns": [
+            "list_role_id"
+          ],
+          "refTable": "roles",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "CASCADE"
+        },
+        {
+          "name": "users_user_role_id_fkey",
+          "columns": [
+            "user_role_id"
+          ],
+          "refTable": "roles",
+          "refColumns": [
+            "id"
+          ],
+          "onDelete": "RESTRICT"
+        }
+      ]
+    }
+  ]
+}

@@ -19,6 +19,8 @@ adults, err := db.Users.
 | [blog](examples/blog/) | A JSON API started from nothing: models, relations, migrations from the first table to a rename, data migrations, a view, seeding, and deployment with Docker | Docker |
 | [audit](examples/audit/) | An audit service: tables partitioned by month, events with their affected persons stored apart, retention on a cron schedule that drops old months, and search and reporting across it all | Docker |
 | [ledger](examples/ledger/) | Double-entry bookkeeping for several tenants: transfers that are safe to retry, balances the database enforces, an outbox for reliable events, encrypted fields, and concurrency tests | Docker |
+| [pagila](examples/pagila/) | ant adopted on an existing database, the Pagila DVD rental sample: hand-written models checked by `drift`, `adopt` and `baseline`, the first migration after them, and the classic Sakila queries checked against plain SQL | PostgreSQL |
+| [listmonk](examples/listmonk/) | A slice of a real application's data layer ported to ant: listmonk's subscribers, lists, campaigns, bounces and settings, on the schema and data its own installer makes, with each query checked against listmonk's SQL | PostgreSQL, Docker |
 
 ## Run one
 
@@ -60,7 +62,7 @@ This starts PostgreSQL, runs the migrations, loads demo data and serves the API 
 
 **Money, or anything else that must never be wrong.** Read the [ledger](examples/ledger/) example, which shows what belongs in the database, what belongs in Go, and how to test the difference.
 
-**A project with a running database and its own migrations.** ant does not generate structs from a database, because the mapping is ambiguous and a person or an AI assistant does it better. It gives you a way to check the work instead: dump your schema, write the models, and let `drift` list what still differs until nothing does. Then `adopt` and `baseline` start the history without touching your data. The [guide](https://skudra.net/migrations/adopting) walks through it, and includes a prompt to give your assistant. An example of this is planned.
+**A project with a running database and its own migrations.** ant does not generate structs from a database, because the mapping is ambiguous and a person or an AI assistant does it better. It gives you a way to check the work instead: dump your schema, write the models, and let `drift` list what still differs until nothing does. Then `adopt` and `baseline` start the history without touching your data. The [guide](https://skudra.net/migrations/adopting) walks through it, and includes a prompt to give your assistant. The [pagila](examples/pagila/) example does it on a real sample database, and lists what didn't fit.
 
 **Keeping another migration tool.** ant's commands that write SQL need no database, and the files are plain SQL in a common layout, so you can use `diff` and `check` and leave running them to the tool you have.
 
