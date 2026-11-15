@@ -1,0 +1,5 @@
+/server
+/migrate
+*.test
+*.out
+.env
