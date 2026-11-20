@@ -56,7 +56,7 @@ Customer 1: MARY SMITH, 1913 Hanoi Way, Sasebo, Japan
    Without `--no-owner`, the baseline carries `ALTER ... OWNER TO` for the role that ran `pg_dump`, and a new database created by any other role fails on it.
 4. Change the models and run `diff`. `0002` holds only the new `imdb_id` column, its partial unique index, and the `film_review` table with its foreign keys to `film` and `customer`.
 
-Give `baseline` the version. With no version it records every migration as applied, so a database adopted after `0002` was written would skip it without a word, and only `drift` would notice.
+Give `baseline` the version. With no version, ant v0.3.2 records every migration as applied, so a database adopted after `0002` was written would skip it without a word, and only `drift` would notice. Later versions of ant refuse when more than one migration is left to record.
 
 ## The queries
 
