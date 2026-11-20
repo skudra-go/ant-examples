@@ -40,7 +40,6 @@ func TestMain(m *testing.M) {
 		context.Background(),
 		postgres.Dialect,
 		dsn,
-		ant.WithTracking(false),
 	)
 	if err != nil {
 		fmt.Println(err)

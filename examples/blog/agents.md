@@ -38,6 +38,6 @@ Changing the schema:
 Using ant:
 
 - Column references are probes: `&models.Posts.Slug`. There are no column name strings in queries.
-- `app.DB` has tracking off, because it is shared. For `SaveChanges`, use `ant.Session(db, ant.WithTracking(true))`, once per unit of work.
+- `app.DB` does not track, because it is shared: `SaveChanges` on it returns `ant.ErrNoTracking`. For `SaveChanges`, use `ant.Session(db)`, once per unit of work.
 - Load relations with `Include` and `IncludeOne`. A relation that was not loaded is nil, and there is no lazy loading.
 - `Delete` on `Post` is a soft delete, and queries skip those rows.

@@ -35,7 +35,6 @@ func run() error {
 		ctx,
 		postgres.Dialect,
 		os.Getenv("DATABASE_URL"),
-		ant.WithTracking(false),
 	)
 	if err != nil {
 		return err

@@ -38,7 +38,6 @@ func New(ctx context.Context, config Config) (*App, error) {
 		ctx,
 		postgres.Dialect,
 		config.DatabaseURL,
-		ant.WithTracking(false),
 		ant.WithLogger(log, ant.SlowThreshold(250_000_000)),
 		ant.WithInterceptor(counters),
 		ant.WithDiagnostics(ant.Diagnostics{RepeatLimit: 50, Budget: 2_000_000_000}),

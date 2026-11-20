@@ -46,7 +46,6 @@ func open(t *testing.T) *models.AppDB {
 		ctx,
 		postgres.Dialect,
 		dsn+"&search_path="+schema,
-		ant.WithTracking(false),
 	)
 	if err != nil {
 		t.Fatal(err)

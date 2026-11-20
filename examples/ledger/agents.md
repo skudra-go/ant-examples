@@ -32,7 +32,7 @@ Transactions:
 
 - A function passed to `Tx` can run more than once. It must not touch anything outside the database.
 - Tell the outside world through the outbox, in the same transaction.
-- Use `ant.Session(db, ant.WithTracking(true))` for `SaveChanges`, once per unit of work. The shared context does not track.
+- Use `ant.Session(db)` for `SaveChanges`, once per unit of work. The shared context does not track: `SaveChanges` on it returns `ant.ErrNoTracking`.
 
 Tenants:
 

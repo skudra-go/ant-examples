@@ -26,7 +26,6 @@ func main() {
 		context.Background(),
 		postgres.Dialect,
 		os.Getenv("DATABASE_URL"),
-		ant.WithTracking(false),
 		ant.WithLogger(log, ant.SlowThreshold(250*time.Millisecond)),
 	)
 	if err != nil {

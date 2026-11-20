@@ -50,7 +50,7 @@ func Transfer(from, to string, amount models.Money, memo, key string) EntryInput
 // collide, the attempt runs again, which is safe because nothing outside the database
 // has happened yet.
 func (s *Journal) Post(ctx context.Context, input EntryInput) (*models.Entry, error) {
-	session := ant.Session(s.db, ant.WithTracking(true))
+	session := ant.Session(s.db)
 
 	var entry *models.Entry
 
@@ -72,7 +72,7 @@ func (s *Journal) Post(ctx context.Context, input EntryInput) (*models.Entry, er
 // Preview runs Post for real and rolls it back, so a caller sees exactly what would
 // happen, including every rule the database enforces, and every statement.
 func (s *Journal) Preview(ctx context.Context, input EntryInput) (*Preview, error) {
-	session := ant.Session(s.db, ant.WithTracking(true))
+	session := ant.Session(s.db)
 	preview := &Preview{}
 
 	statements, err := ant.DryRun(ctx, session, func(tx *models.AppDB) error {
@@ -264,7 +264,7 @@ func (s *Journal) Reverse(ctx context.Context, number int64, memo string) (*mode
 		func(a, b LineInput) int { return cmp.Compare(a.Account, b.Account) },
 	)
 
-	session := ant.Session(s.db, ant.WithTracking(true))
+	session := ant.Session(s.db)
 
 	var entry *models.Entry
 
