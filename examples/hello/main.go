@@ -55,7 +55,12 @@ CREATE TABLE IF NOT EXISTS posts (
 func main() {
 	ctx := context.Background()
 
-	db, err := ant.Open[AppDB](ctx, sqlite.Dialect, "file:hello.db")
+	// foreign_keys turns on the REFERENCES checks, which SQLite skips by default.
+	// busy_timeout and _txlock=immediate make concurrent writers wait their turn
+	// instead of failing with "database is locked".
+	const dsn = "file:hello.db?_pragma=foreign_keys(1)&_pragma=busy_timeout(5000)&_txlock=immediate"
+
+	db, err := ant.Open[AppDB](ctx, sqlite.Dialect, dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
