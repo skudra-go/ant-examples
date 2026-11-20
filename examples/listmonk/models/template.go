@@ -23,7 +23,6 @@ type Template struct {
 var Templates = ant.Fields[Template]()
 
 func (Template) Configure(b *ant.ModelBuilder[Template]) {
-
 	b.Column(&Templates.Type).
 		Enum("template_type", "campaign", "campaign_visual", "tx").
 		Default("'campaign'::template_type")

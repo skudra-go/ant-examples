@@ -1,6 +1,7 @@
 package core_test
 
 import (
+	"encoding/json"
 	"errors"
 	"slices"
 	"strings"
@@ -161,10 +162,9 @@ func TestQuerySubscribersMatchesUpstream(t *testing.T) {
 }
 
 func TestQuerySubscribersRefusesWrites(t *testing.T) {
-	// Not isolated: anttest.Isolate runs the test in a transaction, and a
-	// nested Tx is a savepoint, which ignores ant.ReadOnly. Against the root,
-	// the read-only transaction refuses the side effect.
-	c := core.New(shared)
+	// Isolated, so the query's read-only Tx is a savepoint inside the test's
+	// transaction, where ant.ReadOnly holds until the savepoint ends.
+	c, _ := setup(t)
 
 	_, _, err := c.QuerySubscribers(
 		t.Context(),
@@ -301,12 +301,12 @@ func TestUpsertSubscriber(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// The context tracks the subscriber from the first read, so Reload rereads it.
+	// The session tracks the subscriber from the first read, so Reload rereads it.
 	if err := db.Subscribers.Reload(ctx, got); err != nil {
 		t.Fatal(err)
 	}
 
-	if got.Name != "Imported" || got.Attribs.V["x"] != float64(1) {
+	if got.Name != "Imported" || got.Attribs.V["x"] != json.Number("1") {
 		t.Errorf("not overwritten: %q %v", got.Name, got.Attribs.V)
 	}
 }

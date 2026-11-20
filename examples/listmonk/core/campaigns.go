@@ -262,22 +262,16 @@ func (c *Core) UpdateCampaignStatus(
 	id int32,
 	status models.CampaignStatus,
 ) (*models.Campaign, error) {
-	// Inside CASE, a bound value is text to PostgreSQL, not the column's enum
-	// type, so each result is cast by hand.
-	cast := func(v models.CampaignStatus) ant.Expr[models.CampaignStatus] {
-		return ant.SQL[models.CampaignStatus]("?::campaign_status", string(v))
-	}
+	set := ant.Set(&C.Status, status)
 
-	next := cast(status)
-
+	// ant casts the CASE to the enum type the column declares.
 	if status == models.CampaignRunning {
-		next = ant.Case[models.CampaignStatus]().
-			WhenExpr(ant.IsNotNull(&C.SendAt), cast(models.CampaignScheduled)).
-			ElseExpr(cast(status))
+		set = ant.SetExpr(&C.Status, ant.Case[models.CampaignStatus]().
+			When(ant.IsNotNull(&C.SendAt), models.CampaignScheduled).
+			Else(status))
 	}
 
-	rows, err := c.db.Campaigns.Where(ant.Eq(&C.ID, id)).
-		UpdateReturning(ctx, ant.SetExpr(&C.Status, next))
+	rows, err := c.db.Campaigns.Where(ant.Eq(&C.ID, id)).UpdateReturning(ctx, set)
 	if err != nil {
 		return nil, err
 	}
