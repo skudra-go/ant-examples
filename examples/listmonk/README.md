@@ -82,15 +82,16 @@ What drift does not see: the materialized views, the `pgcrypto` extension, and t
 
 ## Limits hit
 
-The port found these, and the tests show the workarounds:
+The port found these in ant. Most are fixed in the ant this example builds against; the tests show the workarounds for the rest.
 
-- A tracked row read again with `ForUpdate` comes back with the values the session already had, not the locked row's.
-- A session of a root opened with `WithTracking(false)` has tracking off too, so `SaveChanges` there saves nothing and returns `nil`. The API turns it on per request.
-- `ant.ReadOnly()` on a `Tx` inside another `Tx` is ignored, so the read-only guard on the admin's SQL does not hold inside a caller's transaction, or under `anttest.Isolate`.
-- Entities loaded inside a nested `Tx` stay tracked after the outer transaction rolls back. With `anttest.Isolate` on one shared tracking root, a later test's `SaveChanges` wrote an earlier test's rows. The tests take a session per test.
+- Fixed: a tracked row read again with `ForUpdate` came back with the values the session already had, not the locked row's. It now refreshes the tracked instance.
+- Fixed: a session of a root opened with `WithTracking(false)` had tracking off too, so `SaveChanges` there saved nothing and returned `nil`. The root does not track now, a session does, and `SaveChanges` on the root returns `ErrNoTracking`. The API takes a session per request.
+- Fixed: `ant.ReadOnly()` on a `Tx` inside another `Tx` was ignored. It holds now, so the read-only guard on the admin's SQL is tested under `anttest.Isolate`.
+- Fixed: entities loaded inside a nested `Tx` stayed tracked after the outer transaction rolled back, so with `anttest.Isolate` a later test's `SaveChanges` wrote an earlier test's rows. A rollback forgets what its transaction began tracking; the tests still take a session per test.
+- Fixed: a bound value inside `CASE` was text to PostgreSQL, so writing a `CASE` into an enum column failed without a cast. ant casts it to the column's enum type.
+- Fixed: `postgres.Array` read a `NULL` element as the string `"NULL"`. It is an error now.
+- Fixed: times came back in the server's local zone. They are read in UTC, so the DTOs pass them on as they are.
+- `ant.JSON[map[string]any]` reads a number as a `json.Number`, not a `float64`, so a test compares with `json.Number("1")`. That is on purpose: it keeps the digits of large integers.
 - `ant.Max` and `ant.Sum` are typed as never `NULL`, but are `NULL` over no rows.
-- A bound value inside `CASE` is text to PostgreSQL, so writing a `CASE` into an enum column fails without a cast.
-- `postgres.Array` reads a `NULL` element as the string `"NULL"`.
 - A field named `IDs` or `URLs` maps to the column `i_ds` or `ur_ls`, so `Raw` leaves it empty.
 - `Lt`, `Gt` and `OrderBy` take no nullable field; `ant.Col(&C.SendAt).Lte(&now)` and `Order(ant.Col(...).Asc())` do.
-- Times come back in the server's local zone, so the DTOs convert them to UTC before they reach JSON.

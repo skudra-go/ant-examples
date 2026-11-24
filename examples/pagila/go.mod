@@ -3,9 +3,9 @@ module github.com/skudra-go/ant-examples/examples/pagila
 go 1.27
 
 require (
-	github.com/jackc/pgx/v5 v5.12.0
+	github.com/jackc/pgx/v5 v5.13.0
 	github.com/shopspring/decimal v1.6.0
-	github.com/skudra-go/ant v0.3.1
+	github.com/skudra-go/ant v0.3.2
 )
 
 require (

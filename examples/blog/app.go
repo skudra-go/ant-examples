@@ -34,7 +34,6 @@ func New(ctx context.Context, config Config) (*App, error) {
 		ctx,
 		postgres.Dialect,
 		config.DatabaseURL,
-		ant.WithTracking(false),
 		ant.WithLogger(log),
 	)
 	if err != nil {

@@ -24,7 +24,6 @@ type Bounce struct {
 var Bounces = ant.Fields[Bounce]()
 
 func (Bounce) Configure(b *ant.ModelBuilder[Bounce]) {
-
 	b.Column(&Bounces.Type).
 		Enum("bounce_type", "soft", "hard", "complaint").
 		Default("'hard'::bounce_type")

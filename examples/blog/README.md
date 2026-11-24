@@ -77,7 +77,7 @@ type Post struct {
 
 **Probes are named after their table.** `models.Posts.Slug` reads like a column, and unlike `P`, the names do not run out at the fifth model.
 
-**The shared context does not track.** A tracker keeps everything it loads, so on a long-lived context it grows without end and mixes up requests. `app.go` turns tracking off, and a service that wants `SaveChanges` opens a session for that one request, as `Posts.Update` does.
+**The shared context does not track.** A tracker keeps everything it loads, so on a long-lived context it grows without end and mixes up requests. The context `Open` returns in `app.go` does not track, and a service that wants `SaveChanges` opens a session for that one request, as `Posts.Update` does.
 
 ## How the schema got here
 

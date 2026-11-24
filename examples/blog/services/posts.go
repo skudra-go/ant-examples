@@ -135,7 +135,7 @@ func (s *Posts) Update(
 	slug string,
 	changes PostChanges,
 ) (*models.Post, error) {
-	session := ant.Session(s.db, ant.WithTracking(true))
+	session := ant.Session(s.db)
 
 	var id int64
 

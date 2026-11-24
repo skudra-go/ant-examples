@@ -3,7 +3,7 @@ module github.com/skudra-go/ant-examples/ledger
 go 1.27
 
 require (
-	github.com/jackc/pgx/v5 v5.12.0
+	github.com/jackc/pgx/v5 v5.13.0
 	github.com/skudra-go/ant v0.0.0
 )
 

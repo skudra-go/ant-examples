@@ -44,10 +44,10 @@ func New(db *models.AppDB, log *slog.Logger) http.Handler {
 }
 
 // core returns a core on a new session: one unit of work per request. The
-// root has tracking off, and a session inherits that, so it is turned on
-// here: without it, SaveChanges would find nothing to save and return nil.
+// root does not track, so SaveChanges on it would return ErrNoTracking; a
+// session does.
 func (s *Server) core() *core.Core {
-	return core.New(ant.Session(s.db, ant.WithTracking(true)))
+	return core.New(ant.Session(s.db))
 }
 
 // envelope is listmonk's response shape: {"data": ...}.

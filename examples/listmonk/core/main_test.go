@@ -49,9 +49,8 @@ func TestMain(m *testing.M) {
 func setup(t *testing.T) (*core.Core, *models.AppDB) {
 	t.Helper()
 
-	// A session per test: Isolate's rollback undoes the rows, but entities
-	// tracked in a nested Tx stay in the tracker they were loaded into, and a
-	// later SaveChanges on a shared tracker writes them again.
+	// A session per test: the root does not track, and each test is a unit
+	// of work whose rows Isolate's rollback undoes.
 	db := anttest.Isolate(t, ant.Session(shared))
 
 	return core.New(db), db

@@ -164,7 +164,7 @@ func (s *Accounts) Rename(
 	code, name string,
 	version int64,
 ) (*models.Account, error) {
-	session := ant.Session(s.db, ant.WithTracking(true))
+	session := ant.Session(s.db)
 
 	account, err := s.byCode(ctx, session, code)
 	if err != nil {
@@ -238,7 +238,7 @@ func (s *Accounts) Import(
 	ctx context.Context,
 	roots []ImportNode,
 ) (created, updated int, err error) {
-	session := ant.Session(s.db, ant.WithTracking(true))
+	session := ant.Session(s.db)
 
 	existing, err := session.Accounts.All(ctx)
 	if err != nil {

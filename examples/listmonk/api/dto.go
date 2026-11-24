@@ -46,8 +46,8 @@ func subscriberDTO(s *models.Subscriber) SubscriberDTO {
 		Attribs:   s.Attribs.V,
 		Status:    s.Status,
 		Lists:     []SubscriptionDTO{},
-		CreatedAt: s.CreatedAt.UTC(),
-		UpdatedAt: s.UpdatedAt.UTC(),
+		CreatedAt: s.CreatedAt,
+		UpdatedAt: s.UpdatedAt,
 	}
 
 	for _, sl := range s.Subscriptions {
@@ -68,8 +68,8 @@ func subscriberDTO(s *models.Subscriber) SubscriberDTO {
 			Optin:                 sl.List.Optin,
 			Tags:                  tags,
 			SubscriptionStatus:    sl.Status,
-			SubscriptionCreatedAt: sl.CreatedAt.UTC(),
-			SubscriptionUpdatedAt: sl.UpdatedAt.UTC(),
+			SubscriptionCreatedAt: sl.CreatedAt,
+			SubscriptionUpdatedAt: sl.UpdatedAt,
 			Meta:                  sl.Meta.V,
 		})
 	}

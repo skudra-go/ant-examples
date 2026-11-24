@@ -99,7 +99,7 @@ That one line brings a column, a global filter, and the tenant on insert, so a q
 
 **A rolled-back preview still uses a sequence number**, because PostgreSQL does not give them back. Entry numbers can have gaps. Accountants who need none should number at period close.
 
-**`ant.WithTracking(false)` on the shared context, `ant.Session` per unit of work.** A tracker keeps what it loads, so the shared context does not track, and each write opens a session with `ant.WithTracking(true)`.
+**The shared context does not track, `ant.Session` per unit of work.** A tracker keeps what it loads, so the context `Open` returns does not track (`SaveChanges` on it returns `ErrNoTracking`), and each write opens a session, which does.
 
 **`Tx` runs its function again on a retry**, so it must not do anything outside the database. That is one more reason the outbox exists.
 
