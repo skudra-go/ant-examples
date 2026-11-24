@@ -1,0 +1,46 @@
+{
+  "format": 1,
+  "dialect": "postgres",
+  "latest": "0001_initial",
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        {
+          "name": "id",
+          "type": "text"
+        },
+        {
+          "name": "created_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "updated_at",
+          "type": "timestamptz"
+        },
+        {
+          "name": "name",
+          "type": "text"
+        },
+        {
+          "name": "email",
+          "type": "text"
+        }
+      ],
+      "primaryKey": {
+        "name": "users_pkey",
+        "columns": [
+          "id"
+        ]
+      },
+      "uniques": [
+        {
+          "name": "users_email_key",
+          "columns": [
+            "email"
+          ]
+        }
+      ]
+    }
+  ]
+}
